@@ -89,36 +89,40 @@ export const MyAccountPage = () => {
       </Text>
       <Box height="64px" />
       <VStack spacing={4} align="stretch">
-        {wishlist.map((item) => (
-          <Box key={item.id} p={4} borderWidth="1px" borderRadius="lg">
-            <HStack spacing={4}>
-              <Image boxSize="50px" src={item.product.imageUrl} alt={item.product.name} />
-              <VStack align="start">
-                <Text fontSize="lg" fontWeight="bold">{item.product.name}</Text>
-                <Text>{item.product.price}원</Text>
-              </VStack>
-              <Button
-                colorScheme="red"
-                size="sm"
-                onClick={() => handleDelete(item.id)}
-              >
-                삭제
-              </Button>
-            </HStack>
-          </Box>
-        ))}
+        {wishlist.length > 0 ? (
+          wishlist.map((item) => (
+            <Box key={item.id} p={4} borderWidth="1px" borderRadius="lg">
+              <HStack spacing={4}>
+                <Image boxSize="50px" src={item.product.imageUrl} alt={item.product.name} />
+                <VStack align="start">
+                  <Text fontSize="lg" fontWeight="bold">{item.product.name}</Text>
+                  <Text>{item.product.price}원</Text>
+                </VStack>
+                <Button
+                  colorScheme="red"
+                  size="sm"
+                  onClick={() => handleDelete(item.id)}
+                >
+                  삭제
+                </Button>
+              </HStack>
+            </Box>
+          ))
+        ) : (
+          <Text>위시리스트에 상품이 없습니다.</Text>
+        )}
       </VStack>
       <HStack spacing={4} mt={4}>
         <Button
           onClick={() => setPage((prev) => Math.max(prev - 1, 0))}
-          isDisabled={page === 0}
+          isDisabled={page === 0 || totalPages === 0}
         >
           이전
         </Button>
-        <Text>{page + 1} / {totalPages}</Text>
+        <Text>{totalPages === 0 ? 1 : page + 1} / {totalPages === 0 ? 1 : totalPages}</Text>
         <Button
           onClick={() => setPage((prev) => Math.min(prev + 1, totalPages - 1))}
-          isDisabled={page === totalPages - 1}
+          isDisabled={page === totalPages - 1 || totalPages === 0}
         >
           다음
         </Button>
