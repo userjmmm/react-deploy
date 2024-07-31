@@ -16,14 +16,21 @@ import { CountOptionItem } from './OptionItem/CountOptionItem';
 
 type Props = ProductDetailRequestParams;
 
+type CountState = {
+  [key: string]: string;
+};
+
 export const OptionSection = ({ productId }: Props) => {
   const { data: detail } = useGetProductDetail({ productId });
   const { data: options } = useGetProductOptions({ productId });
 
-  const [countAsString, setCountAsString] = useState('1');
+  const [counts, setCounts] = useState<CountState>({});
   const totalPrice = useMemo(() => {
-    return detail.price * Number(countAsString);
-  }, [detail, countAsString]);
+    if (!detail)
+      return 0;
+    const count = Object.values(counts).reduce((acc, countStr) => acc + Number(countStr), 0);
+    return detail.price * count;
+  }, [detail, counts]);
 
   const navigate = useNavigate();
   const authInfo = useAuth();
@@ -47,9 +54,9 @@ export const OptionSection = ({ productId }: Props) => {
         },
         body: JSON.stringify({
           productId: parseInt(productId, 10),
-          name: detail.name,
-          price: detail.price,
-          imageUrl: detail.imageUrl,
+          name: detail?.name,
+          price: detail?.price,
+          imageUrl: detail?.imageUrl,
         }),
       });
 
@@ -80,9 +87,11 @@ export const OptionSection = ({ productId }: Props) => {
       return navigate(getDynamicPath.login());
     }
 
+    const totalCount = Object.values(counts).reduce((acc, countStr) => acc + Number(countStr), 0);
+
     orderHistorySessionStorage.set({
       id: parseInt(productId, 10),
-      count: parseInt(countAsString, 10),
+      count: totalCount,
     });
 
     navigate(RouterPath.order);
@@ -90,13 +99,14 @@ export const OptionSection = ({ productId }: Props) => {
 
   return (
     <Wrapper>
-      {options && options.length > 0 && (
+      {options && options.map(option => (
         <CountOptionItem
-          name={options[0].name}
-          value={countAsString}
-          onChange={setCountAsString}
+          key={option.id}
+          name={option.name}
+          value={counts[option.id] || '1'}
+          onChange={value => setCounts(prev => ({ ...prev, [option.id]: value }))}
         />
-      )}
+      ))}
       <BottomWrapper>
         <Button theme="kakao" size="large" onClick={handleInterestClick}>
           관심 등록
@@ -122,7 +132,7 @@ const Wrapper = styled.div`
 `;
 
 const BottomWrapper = styled.div`
-  padding: 12px 0 0;
+  padding: 270px 0 0;
 `;
 
 const PricingWrapper = styled.div`

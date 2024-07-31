@@ -5,6 +5,8 @@ module.exports = {
     '@babel/preset-typescript',
   ],
   plugins: [
-    '@babel/plugin-proposal-private-property-in-object'
+    '@babel/plugin-proposal-private-property-in-object',
+    '@babel/plugin-proposal-private-methods',
+    '@babel/plugin-proposal-class-properties',
   ]
 };
