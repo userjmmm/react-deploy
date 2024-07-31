@@ -28,7 +28,7 @@ export const OptionSection = ({ productId }: Props) => {
     const initialCounts: CountState = {};
     if (options) {
       options.forEach(option => {
-        initialCounts[option.id] = '1';
+        initialCounts[option.id] = '0';
       });
     }
     return initialCounts;
@@ -40,7 +40,7 @@ export const OptionSection = ({ productId }: Props) => {
         const newCounts = { ...prevCounts };
         options.forEach(option => {
           if (!newCounts[option.id]) {
-            newCounts[option.id] = '1';
+            newCounts[option.id] = '0';
           }
         });
         return newCounts;
@@ -49,7 +49,8 @@ export const OptionSection = ({ productId }: Props) => {
   }, [options]);
 
   const totalPrice = useMemo(() => {
-    if (!detail) return 0;
+    if (!detail)
+      return 0;
     const count = Object.values(counts).reduce((acc, countStr) => acc + Number(countStr), 0);
     return detail.price * count;
   }, [detail, counts]);
@@ -105,11 +106,17 @@ export const OptionSection = ({ productId }: Props) => {
         '로그인이 필요한 메뉴입니다.\n로그인 페이지로 이동하시겠습니까?',
       );
 
-      if (!isConfirm) return;
+      if (!isConfirm)
+        return;
       return navigate(getDynamicPath.login());
     }
 
     const totalCount = Object.values(counts).reduce((acc, countStr) => acc + Number(countStr), 0);
+
+    if (totalCount === 0) {
+      alert('옵션을 선택해주세요.');
+      return;
+    }
 
     orderHistorySessionStorage.set({
       id: parseInt(productId, 10),
