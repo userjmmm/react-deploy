@@ -46,7 +46,7 @@ export const OptionSection = ({ productId }: Props) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          productId: parseInt(productId),
+          productId: parseInt(productId, 10),
           name: detail.name,
           price: detail.price,
           imageUrl: detail.imageUrl,
@@ -81,8 +81,8 @@ export const OptionSection = ({ productId }: Props) => {
     }
 
     orderHistorySessionStorage.set({
-      id: parseInt(productId),
-      count: parseInt(countAsString),
+      id: parseInt(productId, 10),
+      count: parseInt(countAsString, 10),
     });
 
     navigate(RouterPath.order);
@@ -90,7 +90,13 @@ export const OptionSection = ({ productId }: Props) => {
 
   return (
     <Wrapper>
-      <CountOptionItem name={options[0].name} value={countAsString} onChange={setCountAsString} />
+      {options && options.length > 0 && (
+        <CountOptionItem
+          name={options[0].name}
+          value={countAsString}
+          onChange={setCountAsString}
+        />
+      )}
       <BottomWrapper>
         <Button theme="kakao" size="large" onClick={handleInterestClick}>
           관심 등록
