@@ -1,16 +1,34 @@
 import styled from '@emotion/styled';
 import { Link, useNavigate } from 'react-router-dom';
+import { useState, useEffect, ChangeEvent } from 'react';
 
 import { Container } from '@/components/common/layouts/Container';
 import { useAuth } from '@/provider/Auth';
 import { getDynamicPath, RouterPath } from '@/routes/path';
+import { updateBaseUrl, queryClient } from '@/api/instance';
 
 export const Header = () => {
   const navigate = useNavigate();
   const authInfo = useAuth();
+  const [selectedApi, setSelectedApi] = useState('default');
+
+  useEffect(() => {
+    const storedBaseUrl = localStorage.getItem('baseURL');
+    if (storedBaseUrl) {
+      setSelectedApi(storedBaseUrl);
+      updateBaseUrl(storedBaseUrl);
+    }
+  }, []);
 
   const handleLogin = () => {
     navigate(getDynamicPath.login());
+  };
+
+  const handleApiChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    const newApi = event.target.value;
+    setSelectedApi(newApi);
+    updateBaseUrl(newApi);
+    queryClient.invalidateQueries();
   };
 
   return (
@@ -23,6 +41,13 @@ export const Header = () => {
           />
         </Link>
         <RightWrapper>
+        <select value={selectedApi} onChange={handleApiChange}>
+            <option value="default">백엔드 API 선택</option>
+            <option value="http://giftshop-kakao.shop:8080">이지호</option>
+            <option value="http://api2.example.com">정성훈</option>
+            <option value="http://api3.example.com">윤재용</option>
+            <option value="http://api3.example.com">주보경</option>
+          </select>
           {authInfo ? (
             <LinkButton onClick={() => navigate(RouterPath.myAccount)}>내 계정</LinkButton>
           ) : (
@@ -49,7 +74,10 @@ export const Wrapper = styled.header`
 const Logo = styled.img`
   height: ${HEADER_HEIGHT};
 `;
-const RightWrapper = styled.div``;
+const RightWrapper = styled.div`
+  display: flex;
+  align-items: center;
+`;
 
 const LinkButton = styled.p`
   align-items: center;
@@ -57,4 +85,5 @@ const LinkButton = styled.p`
   color: #000;
   text-decoration: none;
   cursor: pointer;
+  margin-left: 20px;
 `;

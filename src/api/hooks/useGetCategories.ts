@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 
 import type { CategoryData } from '@/types';
 
-import { BASE_URL, fetchInstance } from '../instance';
+import { getBaseUrl, fetchInstance } from '../instance';
 
 export type CategoryResponseData = {
   totalElements: number;
@@ -33,8 +33,7 @@ export type CategoryResponseData = {
   empty: boolean;
 };
 
-export const getCategoriesPath = () => `${BASE_URL}/api/categories`;
-const categoriesQueryKey = [getCategoriesPath()];
+export const getCategoriesPath = () => `${getBaseUrl()}/api/categories`;
 
 export const getCategories = async () => {
   const response = await fetchInstance.get<CategoryResponseData>(getCategoriesPath());
@@ -43,6 +42,6 @@ export const getCategories = async () => {
 
 export const useGetCategories = () =>
   useQuery({
-    queryKey: categoriesQueryKey,
+    queryKey: [getCategoriesPath()],
     queryFn: getCategories,
   });
