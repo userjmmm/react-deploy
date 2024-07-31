@@ -19,11 +19,12 @@ export const OrderForm = ({ orderHistory }: Props) => {
 
   const methods = useForm<OrderFormData>({
     defaultValues: {
-      productId: id,
+      optionId: id, // id = optionId로 변경
       productQuantity: count,
       senderId: 0,
       receiverId: 0,
       hasCashReceipt: false,
+      messageCardTextMessage: '',
     },
   });
   const { handleSubmit } = methods;

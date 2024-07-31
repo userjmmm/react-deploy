@@ -12,7 +12,7 @@ type Props = {
 
 export const CountOptionItem = ({
   name,
-  minValues = 1,
+  minValues = 0,
   maxValues = 100,
   value,
   onChange,

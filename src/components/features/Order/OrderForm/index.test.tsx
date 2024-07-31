@@ -1,8 +1,8 @@
 import '@testing-library/jest-dom/extend-expect';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { fireEvent,render, screen } from '@testing-library/react';
-import { FormProvider,useForm } from 'react-hook-form';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { FormProvider, useForm } from 'react-hook-form';
 
 import type { OrderFormData } from '@/types';
 
@@ -13,13 +13,14 @@ const queryClient = new QueryClient();
 const Wrapper = ({ children, orderHistory }: { children: React.ReactNode, orderHistory: { id: number, count: number } }) => {
   const methods = useForm<OrderFormData>({
     defaultValues: {
-      productId: orderHistory.id,
+      optionId: orderHistory.id, // productId 대신 optionId 사용
       productQuantity: orderHistory.count,
       senderId: 0,
       receiverId: 0,
       hasCashReceipt: false,
       cashReceiptType: 'PERSONAL',
       cashReceiptNumber: '',
+      messageCardTextMessage: '', // 기본값 추가
     },
   });
 
@@ -32,7 +33,7 @@ const Wrapper = ({ children, orderHistory }: { children: React.ReactNode, orderH
 
 describe('OrderForm 컴포넌트', () => {
   const orderHistory = {
-    id: 1,
+    id: 1, // optionId를 의미
     count: 2,
   };
 
@@ -62,7 +63,7 @@ describe('OrderForm 컴포넌트', () => {
         <OrderForm orderHistory={orderHistory} />
       </Wrapper>
     );
-    
+
     fireEvent.change(screen.getByPlaceholderText('선물과 함께 보낼 메시지를 적어보세요'), { target: { value: 'Test message' } });
     fireEvent.submit(screen.getByRole('form'));
 
