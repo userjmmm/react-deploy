@@ -8,7 +8,7 @@ import { UnderlineTextField } from '@/components/common/Form/Input/UnderlineText
 import { Spacing } from '@/components/common/layouts/Spacing';
 import { breakpoints } from '@/styles/variants';
 import { authSessionStorage } from '@/utils/storage';
-import { BASE_URL } from '@/api/instance';
+import { getBaseUrl } from '@/api/instance';
 
 export const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -60,7 +60,8 @@ export const LoginPage = () => {
   };
 
   const handleKakaoLogin = () => {
-    window.location.href = `${BASE_URL}/oauth/kakao`;
+    const baseUrl = getBaseUrl;
+    window.location.href = `${baseUrl}/oauth/kakao`;
   };
 
   return (
