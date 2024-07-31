@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
-import { useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 
 import KAKAO_LOGO from '@/assets/kakao_logo.svg';
 import { Button } from '@/components/common/Button';
@@ -8,12 +8,25 @@ import { UnderlineTextField } from '@/components/common/Form/Input/UnderlineText
 import { Spacing } from '@/components/common/layouts/Spacing';
 import { breakpoints } from '@/styles/variants';
 import { authSessionStorage } from '@/utils/storage';
+import { BASE_URL } from '@/api/instance';
 
 export const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [queryParams] = useSearchParams();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    const queryParams = new URLSearchParams(location.search);
+    const token = queryParams.get('token');
+
+    if (token) {
+      console.log({ token });
+      authSessionStorage.set(JSON.stringify({ token }));
+      navigate('/');
+    }
+  }, [location, navigate]);
 
   const handleConfirm = async () => {
     if (!email || !password) {
@@ -46,6 +59,10 @@ export const LoginPage = () => {
     }
   };
 
+  const handleKakaoLogin = () => {
+    window.location.href = `${BASE_URL}/oauth/kakao`;
+  };
+
   return (
     <Wrapper>
       <Logo src={KAKAO_LOGO} alt="카카고 CI" />
@@ -67,7 +84,7 @@ export const LoginPage = () => {
         <Button onClick={handleConfirm}>로그인</Button>
 
         <Button
-          onClick={() => (window.location.href = 'http://43.201.254.198:8080/api/kakaologin')}
+          onClick={handleKakaoLogin}
           style={{ backgroundColor: '#F7E600', color: '#3C1E1E' }}
         >
           카카오로 로그인

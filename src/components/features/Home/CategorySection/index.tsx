@@ -8,12 +8,20 @@ import { getDynamicPath } from '@/routes/path';
 import { breakpoints } from '@/styles/variants';
 
 import { CategoryItem } from './CategoryItem';
+import { LoadingView } from '@/components/common/View/LoadingView';
 
 export const CategorySection = () => {
   const { data, isLoading, isError } = useGetCategories();
 
-  if (isLoading || isError) return null;
-  if (!data) return null;
+  if (isLoading) {
+    return <LoadingView />;
+  }
+  if (isError) {
+    return <ErrorMessage>문제가 발생했습니다. 나중에 다시 시도해주세요.</ErrorMessage>;
+  }
+  if (!data || !data.content) {
+    return <EmptyMessage>카테고리가 없습니다.</EmptyMessage>;
+  }
 
   return (
     <Wrapper>
@@ -41,4 +49,14 @@ const Wrapper = styled.section`
   @media screen and (min-width: ${breakpoints.sm}) {
     padding: 45px 52px 23px;
   }
+`;
+const ErrorMessage = styled.div`
+  padding: 20px;
+  text-align: center;
+  color: red;
+`;
+
+const EmptyMessage = styled.div`
+  padding: 20px;
+  text-align: center;
 `;
