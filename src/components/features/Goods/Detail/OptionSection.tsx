@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import {
@@ -24,10 +24,32 @@ export const OptionSection = ({ productId }: Props) => {
   const { data: detail } = useGetProductDetail({ productId });
   const { data: options } = useGetProductOptions({ productId });
 
-  const [counts, setCounts] = useState<CountState>({});
+  const [counts, setCounts] = useState<CountState>(() => {
+    const initialCounts: CountState = {};
+    if (options) {
+      options.forEach(option => {
+        initialCounts[option.id] = '1';
+      });
+    }
+    return initialCounts;
+  });
+
+  useEffect(() => {
+    if (options) {
+      setCounts(prevCounts => {
+        const newCounts = { ...prevCounts };
+        options.forEach(option => {
+          if (!newCounts[option.id]) {
+            newCounts[option.id] = '1';
+          }
+        });
+        return newCounts;
+      });
+    }
+  }, [options]);
+
   const totalPrice = useMemo(() => {
-    if (!detail)
-      return 0;
+    if (!detail) return 0;
     const count = Object.values(counts).reduce((acc, countStr) => acc + Number(countStr), 0);
     return detail.price * count;
   }, [detail, counts]);
@@ -103,7 +125,7 @@ export const OptionSection = ({ productId }: Props) => {
         <CountOptionItem
           key={option.id}
           name={option.name}
-          value={counts[option.id] || '1'}
+          value={counts[option.id]}
           onChange={value => setCounts(prev => ({ ...prev, [option.id]: value }))}
         />
       ))}
