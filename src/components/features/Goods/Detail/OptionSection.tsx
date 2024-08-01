@@ -69,21 +69,23 @@ export const OptionSection = ({ productId }: Props) => {
     }
 
     try {
+      const requestBody = {
+        productId: parseInt(productId, 10),
+        quantity: null,
+      };
+
+      console.log('Sending request to add wish', requestBody); // 잘 받아오는지 확인 - 추후 삭제 예정
+
       const response = await fetch('/api/wishes', {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${authInfo.token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          productId: parseInt(productId, 10),
-          name: detail?.name,
-          price: detail?.price,
-          imageUrl: detail?.imageUrl,
-        }),
+        body: JSON.stringify(requestBody),
       });
 
-      if (response.status === 201) {
+      if (response.ok) {
         alert('관심 등록 완료');
       } else if (response.status === 400) {
         alert('잘못된 요청입니다.');
