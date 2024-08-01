@@ -45,8 +45,8 @@ export const Header = () => {
         <select value={selectedApi} onChange={handleApiChange}>
             <option value="default">백엔드 API 선택</option>
             <option value="http://giftshop-kakao.shop:8080">이지호</option>
-            <option value="http://api2.example.com">정성훈</option>
-            <option value="http://api3.example.com">윤재용</option>
+            <option value="http://43.201.254.198:8080">정성훈</option>
+            <option value="https://bream-happy-husky.ngrok-free.app">윤재용</option>
             <option value="http://api3.example.com">주보경</option>
           </select>
           {authInfo ? (

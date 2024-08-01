@@ -1,8 +1,6 @@
 import type { ReactNode } from 'react';
 import { createContext, useContext, useEffect, useState } from 'react';
 
-import { authSessionStorage } from '@/utils/storage';
-
 type AuthInfo = {
   id: string;
   name: string;
@@ -12,7 +10,7 @@ type AuthInfo = {
 export const AuthContext = createContext<AuthInfo | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const currentAuthToken = authSessionStorage.get();
+  const currentAuthToken = localStorage.getItem('authToken');
   const [isReady, setIsReady] = useState(!currentAuthToken);
 
   const [authInfo, setAuthInfo] = useState<AuthInfo | undefined>(undefined);
