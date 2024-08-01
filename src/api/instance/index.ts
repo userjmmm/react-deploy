@@ -39,6 +39,7 @@ export const updateBaseUrl = (newBaseUrl: string) => {
   fetchInstance = initInstance({
     baseURL: BASE_URL,
   });
+  // 선택한 이름마다 잘 받아오는지 확인용, 추후 삭제 예정
   console.log('Updated fetchInstance:', fetchInstance.defaults.baseURL);
 };
 
