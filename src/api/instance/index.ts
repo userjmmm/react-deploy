@@ -42,4 +42,6 @@ export const updateBaseUrl = (newBaseUrl: string) => {
   console.log('Updated fetchInstance:', fetchInstance.defaults.baseURL);
 };
 
-export const getBaseUrl = () => BASE_URL;
+export const getBaseUrl = () => {
+  return localStorage.getItem('baseURL') || 'https://api.example.com';
+};
