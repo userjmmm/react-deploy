@@ -3,8 +3,7 @@ import styled from '@emotion/styled';
 import { useEffect, useState } from 'react';
 
 import { RouterPath } from '@/routes/path';
-import { authSessionStorage } from '@/utils/storage';
-import { fetchInstance,getBaseUrl } from '@/api/instance';
+import { fetchInstance, getBaseUrl } from '@/api/instance';
 
 interface WishlistItem {
   wishId: number;
@@ -44,7 +43,8 @@ interface WishlistResponseData {
 }
 
 export const MyAccountPage = () => {
-  const authInfo = JSON.parse(authSessionStorage.get() || '{}');
+  const authToken = localStorage.getItem('authToken');
+  const authInfo = authToken ? { token: authToken } : {};
   const [wishlist, setWishlist] = useState<WishlistItem[]>([]);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
@@ -79,7 +79,9 @@ export const MyAccountPage = () => {
   };
 
   useEffect(() => {
-    fetchWishlist(page);
+    if (authInfo.token) {
+      fetchWishlist(page);
+    }
   }, [page, authInfo.token]);
 
   const handleDelete = async (wishId: number) => {
@@ -108,7 +110,6 @@ export const MyAccountPage = () => {
   };
 
   const handleLogout = () => {
-    authSessionStorage.set(undefined);
     localStorage.removeItem('authToken');
 
     const redirectURL = `${window.location.origin}${RouterPath.home}`;
@@ -118,7 +119,7 @@ export const MyAccountPage = () => {
   return (
     <Wrapper>
       <Text fontSize="2xl" fontWeight="bold">
-        {authInfo?.email}님 안녕하세요!
+        {authInfo.token ? '안녕하세요!' : '로그인이 필요합니다.'}
       </Text>
       <Box height="64px" />
       <VStack spacing={4} align="stretch">
