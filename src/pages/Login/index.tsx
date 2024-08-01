@@ -1,13 +1,12 @@
 import styled from '@emotion/styled';
-import { useState, useEffect } from 'react';
-import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import KAKAO_LOGO from '@/assets/kakao_logo.svg';
 import { Button } from '@/components/common/Button';
 import { UnderlineTextField } from '@/components/common/Form/Input/UnderlineTextField';
 import { Spacing } from '@/components/common/layouts/Spacing';
 import { breakpoints } from '@/styles/variants';
-import { authSessionStorage } from '@/utils/storage';
 import { getBaseUrl } from '@/api/instance';
 
 export const LoginPage = () => {
@@ -15,18 +14,6 @@ export const LoginPage = () => {
   const [password, setPassword] = useState('');
   const [queryParams] = useSearchParams();
   const navigate = useNavigate();
-  const location = useLocation();
-
-  useEffect(() => {
-    const queryParams = new URLSearchParams(location.search);
-    const token = queryParams.get('token');
-
-    if (token) {
-      console.log({ token });
-      authSessionStorage.set(JSON.stringify({ token }));
-      navigate('/');
-    }
-  }, [location, navigate]);
 
   const handleConfirm = async () => {
     if (!email || !password) {
@@ -45,7 +32,7 @@ export const LoginPage = () => {
 
       if (response.status === 200) {
         const data = await response.json();
-        authSessionStorage.set(JSON.stringify({ token: data.token, email: data.email }));
+        localStorage.setItem('authToken', data.token);
         const redirectUrl = queryParams.get('redirect') ?? `${window.location.origin}/`;
         window.location.replace(redirectUrl);
       } else if (response.status === 403) {
