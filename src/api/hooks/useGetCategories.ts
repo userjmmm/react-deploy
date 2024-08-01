@@ -35,13 +35,25 @@ export type CategoryResponseData = {
 
 export const getCategoriesPath = () => `${getBaseUrl()}/api/categories`;
 
-export const getCategories = async () => {
-  const response = await fetchInstance.get<CategoryResponseData>(getCategoriesPath());
-  return response.data;
+export const getCategories = async (): Promise<CategoryData[]> => {
+  let allCategories: CategoryData[] = [];
+  let currentPage = 0;
+  let hasNextPage = true;
+
+  while (hasNextPage) {
+    const response = await fetchInstance.get<CategoryResponseData>(
+      `${getCategoriesPath()}?page=${currentPage}&size=100`
+    );
+    allCategories = [...allCategories, ...response.data.content];
+    hasNextPage = !response.data.last;
+    currentPage++;
+  }
+
+  return allCategories;
 };
 
 export const useGetCategories = () =>
   useQuery({
-    queryKey: [getCategoriesPath()],
+    queryKey: ['categories'],
     queryFn: getCategories,
   });

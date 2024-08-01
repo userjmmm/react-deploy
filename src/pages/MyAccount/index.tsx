@@ -59,7 +59,7 @@ export const MyAccountPage = () => {
         },
       });
 
-      if (response.status === 204) {
+      if (response.status === 204) { // 200 경우도 추가
         setWishlist((prev) => prev.filter((item) => item.id !== wishId));
         alert('관심 목록에서 삭제되었습니다.');
       } else if (response.status === 404) {

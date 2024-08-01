@@ -11,7 +11,7 @@ import { CategoryItem } from './CategoryItem';
 import { LoadingView } from '@/components/common/View/LoadingView';
 
 export const CategorySection = () => {
-  const { data, isLoading, isError } = useGetCategories();
+  const { data: categories, isLoading, isError } = useGetCategories();
 
   if (isLoading) {
     return <LoadingView />;
@@ -19,7 +19,7 @@ export const CategorySection = () => {
   if (isError) {
     return <ErrorMessage>문제가 발생했습니다. 나중에 다시 시도해주세요.</ErrorMessage>;
   }
-  if (!data || !data.content) {
+  if (!categories || categories.length === 0 ) {
     return <EmptyMessage>카테고리가 없습니다.</EmptyMessage>;
   }
 
@@ -32,7 +32,7 @@ export const CategorySection = () => {
             md: 6,
           }}
         >
-          {data.content.map((category) => (
+          {categories.map((category) => (
             <Link key={category.id} to={getDynamicPath.category(category.id.toString())}>
               <CategoryItem image={category.imageUrl} label={category.name} />
             </Link>
