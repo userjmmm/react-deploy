@@ -27,6 +27,7 @@ export const Header = () => {
   const handleApiChange = (event: ChangeEvent<HTMLSelectElement>) => {
     const newApi = event.target.value;
     setSelectedApi(newApi);
+    localStorage.setItem('baseURL', newApi);
     updateBaseUrl(newApi);
     queryClient.invalidateQueries();
   };
