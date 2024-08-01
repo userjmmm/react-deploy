@@ -6,15 +6,17 @@ import { getCurrentCategory } from '@/components/features/Category/CategoryHeroS
 type Props = { categoryId: string };
 
 export const useCurrentCategory = ({ categoryId }: Props) => {
-  const { data, isLoading, isError } = useGetCategories();
+  const { data: categories, isLoading, isError } = useGetCategories();
 
   const isRender = useMemo(() => {
-    if (isLoading || isError) return false;
-    if (!data) return false;
+    if (isLoading || isError)
+      return false;
+    if (!categories)
+      return false;
     return true;
-  }, [data, isLoading, isError]);
+  }, [categories, isLoading, isError]);
 
-  const currentTheme = getCurrentCategory(categoryId, data?.content ?? []);
+  const currentTheme = getCurrentCategory(categoryId, categories ?? []);
 
   return {
     isRender,

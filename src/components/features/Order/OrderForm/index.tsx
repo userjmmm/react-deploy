@@ -19,7 +19,7 @@ export const OrderForm = ({ orderHistory }: Props) => {
 
   const methods = useForm<OrderFormData>({
     defaultValues: {
-      optionId: id, // id = optionId로 변경
+      optionId: id, // id = optionId로 변경 - 4개만 보내는 거로
       productQuantity: count,
       senderId: 0,
       receiverId: 0,
