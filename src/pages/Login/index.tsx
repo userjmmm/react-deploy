@@ -60,7 +60,7 @@ export const LoginPage = () => {
   };
 
   const handleKakaoLogin = () => {
-    const baseUrl = getBaseUrl;
+    const baseUrl = getBaseUrl();
     window.location.href = `${baseUrl}/oauth/kakao`;
   };
 
