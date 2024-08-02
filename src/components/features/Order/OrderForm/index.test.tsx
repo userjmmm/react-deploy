@@ -4,23 +4,23 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { FormProvider, useForm } from 'react-hook-form';
 
-import type { OrderFormData } from '@/types';
+import type { OrderFormData, OrderHistory } from '@/types';
 
 import { OrderForm } from '.';
 
 const queryClient = new QueryClient();
 
-const Wrapper = ({ children, orderHistory }: { children: React.ReactNode, orderHistory: { productId: number, optionId: number, quantity: number, message: string } }) => {
+const Wrapper = ({ children, orderHistory }: { children: React.ReactNode, orderHistory: OrderHistory[] }) => {
   const methods = useForm<OrderFormData>({
     defaultValues: {
-      optionId: orderHistory.optionId,
-      productQuantity: orderHistory.quantity,
+      optionId: orderHistory[0].optionId,
+      productQuantity: orderHistory[0].quantity,
       senderId: 0,
       receiverId: 0,
       hasCashReceipt: false,
       cashReceiptType: 'PERSONAL',
       cashReceiptNumber: '',
-      messageCardTextMessage: orderHistory.message,
+      message: orderHistory[0].message, // 변경
     },
   });
 
@@ -32,12 +32,14 @@ const Wrapper = ({ children, orderHistory }: { children: React.ReactNode, orderH
 };
 
 describe('OrderForm 컴포넌트', () => {
-  const orderHistory = {
-    productId: 1,
-    optionId: 1,
-    quantity: 2,
-    message: '',
-  };
+  const orderHistory: OrderHistory[] = [
+    {
+      productId: 1,
+      optionId: 1,
+      quantity: 2,
+      message: '',
+    },
+  ];
 
   test('폼이 렌더링되는지 확인', () => {
     render(

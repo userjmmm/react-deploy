@@ -1,36 +1,42 @@
 import styled from '@emotion/styled';
 import { FormProvider, useForm } from 'react-hook-form';
-
 import { Spacing } from '@/components/common/layouts/Spacing';
 import { SplitLayout } from '@/components/common/layouts/SplitLayout';
 import type { OrderFormData, OrderHistory } from '@/types';
-
 import { HEADER_HEIGHT } from '../../Layout/Header';
 import { GoodsInfo } from './GoodsInfo';
 import { OrderFormMessageCard } from './MessageCard';
 import { OrderFormOrderInfo } from './OrderInfo';
 import { getBaseUrl } from '@/api/instance';
 import { useAuth } from '@/provider/Auth';
+import { orderHistorySessionStorage } from '@/utils/storage';
+import { useEffect } from 'react';
 
 type Props = {
-  orderHistory: OrderHistory;
+  orderHistory: OrderHistory[];
 };
 
 export const OrderForm = ({ orderHistory }: Props) => {
-  const { optionId, quantity, message } = orderHistory;
-
   const methods = useForm<OrderFormData>({
     defaultValues: {
-      optionId,
-      productQuantity: quantity,
+      optionId: orderHistory[0]?.optionId ?? 0,
+      productQuantity: orderHistory[0]?.quantity ?? 0,
       senderId: 0,
       receiverId: 0,
       hasCashReceipt: false,
-      messageCardTextMessage: message,
+      message: orderHistory[0]?.message ?? '',
     },
   });
-  const { handleSubmit } = methods;
+
+  const { handleSubmit, watch } = methods;
   const authInfo = useAuth();
+
+  const message = watch('message');
+  console.log('OrderForm에서 현재 메시지:', message);
+
+  useEffect(() => {
+    console.log('OrderForm useEffect - 메시지 변경:', message);
+  }, [message]);
 
   const handleForm = async (values: OrderFormData) => {
     const { errorMessage, isValid } = validateOrderForm(values);
@@ -40,14 +46,21 @@ export const OrderForm = ({ orderHistory }: Props) => {
       return;
     }
 
-    const requestBody = {
-      optionId: values.optionId,
-      quantity: values.productQuantity,
-      message: values.messageCardTextMessage,
-    };
+    const orders = orderHistorySessionStorage.get() as OrderHistory[];
 
-    try {
-      const response = await fetch(`${getBaseUrl()}/api/orders`, {
+    console.log('유효성 검사 통과 후 값:', values);
+    console.log('선택된 옵션 및 수량:', orders);
+
+    const requests = orders.map(order => {
+      const requestBody = {
+        optionId: order.optionId,
+        quantity: order.quantity,
+        message: values.message,
+      };
+
+      console.log('서버로 전송하는 요청 데이터:', requestBody);
+
+      return fetch(`${getBaseUrl()}/api/orders`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${authInfo?.token}`,
@@ -55,25 +68,33 @@ export const OrderForm = ({ orderHistory }: Props) => {
         },
         body: JSON.stringify(requestBody),
         credentials: 'include',
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`주문 실패: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then(data => {
+        console.log(`옵션 ID ${order.optionId} 주문 성공:`, data);
+        return data;
+      })
+      .catch(error => {
+        console.error(`옵션 ID ${order.optionId} 주문 에러:`, error);
+        throw error;
       });
+    });
 
-      if (response.ok) {
-        console.log('Request Body:', requestBody);
-        alert('주문이 완료되었습니다.');
-      }
-      else if (response.status === 403) {
-        alert('주문 권한이 없습니다. 로그인 상태를 확인해주세요.');
-      }
-      else {
-        alert('주문에 실패했습니다.');
-      }
+    try {
+      const results = await Promise.all(requests);
+      alert('모든 주문이 완료되었습니다.');
+      console.log('모든 주문 결과:', results);
     } catch (error) {
       console.error('주문 에러:', error);
-      alert('주문 에러가 발생했습니다.');
+      alert('주문 중 에러가 발생했습니다.');
     }
   };
 
-  // Submit 버튼을 누르면 form이 제출되는 것을 방지하기 위한 함수
   const preventEnterKeySubmission = (e: React.KeyboardEvent<HTMLFormElement>) => {
     const target = e.target as HTMLFormElement;
     if (e.key === 'Enter' && !['TEXTAREA'].includes(target.tagName)) {
@@ -84,19 +105,23 @@ export const OrderForm = ({ orderHistory }: Props) => {
   return (
     <FormProvider {...methods}>
       <form action="" onSubmit={handleSubmit(handleForm)} onKeyDown={preventEnterKeySubmission}>
-        <SplitLayout sidebar={<OrderFormOrderInfo orderHistory={orderHistory} />}>
-          <Wrapper>
-            <OrderFormMessageCard />
-            <Spacing height={8} backgroundColor="#ededed" />
-            <GoodsInfo orderHistory={orderHistory} />
-          </Wrapper>
-        </SplitLayout>
+        {orderHistory.map((order, index) => (
+          <SplitLayout key={index} sidebar={<OrderFormOrderInfo orderHistory={order} />}>
+            <Wrapper>
+              <OrderFormMessageCard />
+              <Spacing height={8} backgroundColor="#ededed" />
+              <GoodsInfo orderHistory={order} />
+            </Wrapper>
+          </SplitLayout>
+        ))}
       </form>
     </FormProvider>
   );
 };
 
 const validateOrderForm = (values: OrderFormData): { errorMessage?: string; isValid: boolean } => {
+  console.log('유효성 검사 값:', values);
+
   if (values.hasCashReceipt) {
     if (!values.cashReceiptNumber) {
       return {
@@ -113,17 +138,17 @@ const validateOrderForm = (values: OrderFormData): { errorMessage?: string; isVa
     }
   }
 
-  if (values.messageCardTextMessage.length < 1) {
+  if (values.message.length < 1) {
     return {
       errorMessage: '메시지를 입력해주세요.',
       isValid: false,
     };
   }
 
-  if (values.messageCardTextMessage.length > 100) {
+  if (values.message.length > 100) {
     return {
-      errorMessage: '메시지는 100자 이내로 입력해주세요.',
-      isValid: false,
+        errorMessage: '메시지는 100자 이내로 입력해주세요.',
+        isValid: false,
     };
   }
 

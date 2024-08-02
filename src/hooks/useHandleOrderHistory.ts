@@ -6,14 +6,14 @@ import type { OrderHistory } from '@/types';
 import { orderHistorySessionStorage } from '@/utils/storage';
 
 export const useHandleOrderHistory = () => {
-  const [orderHistory, setOrderHistory] = useState<OrderHistory>();
+  const [orderHistory, setOrderHistory] = useState<OrderHistory[]>([]);
   const navigate = useNavigate();
+
   useEffect(() => {
     const prevOrderHistory = orderHistorySessionStorage.get();
 
-    if (!prevOrderHistory) {
+    if (!prevOrderHistory || prevOrderHistory.length === 0) {
       alert('주문 내역이 없습니다.\n메인 화면으로 이동합니다.');
-
       navigate(RouterPath.home);
       return;
     }
