@@ -59,18 +59,19 @@ export const OrderForm = ({ orderHistory }: Props) => {
         credentials: 'include',
       })
       .then(async response => {
+        const status = response.status;
         if (!response.ok) {
           const errorBody = await response.text();
-          console.error(`옵션 ID ${order.optionId} 주문 실패:`, response.status, errorBody);
-          return { success: false, optionId: order.optionId, error: errorBody };
+          console.error(`옵션 ID ${order.optionId} 주문 실패:`, status, errorBody);
+          return { success: false, optionId: order.optionId, status, error: errorBody };
         }
         const data = await response.json();
         console.log(`옵션 ID ${order.optionId} 주문 성공:`, data);
-        return { success: true, optionId: order.optionId, data };
+        return { success: true, optionId: order.optionId, status, data };
       })
       .catch(error => {
         console.error(`옵션 ID ${order.optionId} 주문 에러:`, error);
-        return { success: false, optionId: order.optionId, error: error.message };
+        return { success: false, optionId: order.optionId, status: 500, error: error.message };
       });
     });
 
@@ -86,7 +87,12 @@ export const OrderForm = ({ orderHistory }: Props) => {
 
       if (failedOrders.length > 0) {
         console.error('실패한 주문:', failedOrders);
-        alert(`${failedOrders.length}개의 주문 중 오류가 발생했습니다.`);
+        const insufficientPoints = failedOrders.some(order => order.status === 400);
+        if (insufficientPoints) {
+          alert('포인트가 부족합니다.');
+        } else {
+          alert(`${failedOrders.length}개의 주문 중 오류가 발생했습니다.`);
+        }
       }
     } catch (error) {
       console.error('주문 처리 중 예외 발생:', error);
