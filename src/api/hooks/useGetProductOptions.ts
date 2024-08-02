@@ -16,6 +16,7 @@ export const getProductOptions = async (params: ProductDetailRequestParams) => {
   const response = await fetchInstance.get<ProductOptionsResponseData>(
     getProductOptionsPath(params.productId),
   );
+  console.log("options: ", response.data);
   return response.data;
 };
 

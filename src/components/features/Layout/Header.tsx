@@ -43,7 +43,7 @@ export const Header = () => {
         </Link>
         <RightWrapper>
         <select value={selectedApi} onChange={handleApiChange}>
-            <option value="default">백엔드 API 선택</option>
+            <option value="http://localhost:8080">백엔드 API 선택</option>
             <option value="http://giftshop-kakao.shop:8080">이지호</option>
             <option value="http://43.201.254.198:8080">정성훈</option>
             <option value="https://bream-happy-husky.ngrok-free.app">윤재용</option>

@@ -2,6 +2,7 @@ import { Divider } from '@chakra-ui/react';
 import styled from '@emotion/styled';
 
 import { useGetProductDetail } from '@/api/hooks/useGetProductDetail';
+import { useGetProductOptions } from '@/api/hooks/useGetProductOptions';
 import { Button } from '@/components/common/Button';
 import { Spacing } from '@/components/common/layouts/Spacing';
 import type { OrderHistory } from '@/types';
@@ -9,15 +10,28 @@ import type { OrderHistory } from '@/types';
 import { HeadingText } from '../Common/HeadingText';
 import { LabelText } from '../Common/LabelText';
 import { CashReceiptFields } from '../Fields/CashReceiptFields';
+import { LoadingView } from '@/components/common/View/LoadingView';
 
 type Props = {
   orderHistory: OrderHistory;
 };
-export const OrderFormOrderInfo = ({ orderHistory }: Props) => {
-  const { id, count } = orderHistory;
 
-  const { data: detail } = useGetProductDetail({ productId: id.toString() });
-  const totalPrice = detail.price * count;
+export const OrderFormOrderInfo = ({ orderHistory }: Props) => {
+  const { productId, optionId, quantity, message } = orderHistory;
+
+  const { data: detail, isLoading: isDetailLoading } = useGetProductDetail({ productId: productId.toString() });
+  const { data: options, isLoading: isOptionsLoading } = useGetProductOptions({ productId: productId.toString() });
+
+  if (isDetailLoading || isOptionsLoading) {
+    return <LoadingView />;
+  }
+
+  if (!detail || !options) {
+    return <div>상품 정보를 불러오는 중 오류가 발생했습니다.</div>;
+  }
+
+  const selectedOption = options.find(option => option.id === optionId);
+  const totalPrice = selectedOption ? detail.price * quantity : 0;
 
   return (
     <Wrapper>
@@ -27,6 +41,22 @@ export const OrderFormOrderInfo = ({ orderHistory }: Props) => {
       <Divider color="#ededed" />
       <CashReceiptFields />
       <Divider color="#ededed" />
+      <ItemWrapper>
+        <LabelText>상품명</LabelText>
+        <HeadingText>{detail.name}</HeadingText>
+      </ItemWrapper>
+      <ItemWrapper>
+        <LabelText>선택한 옵션</LabelText>
+        <HeadingText>{selectedOption ? selectedOption.name : '옵션 없음'}</HeadingText>
+      </ItemWrapper>
+      <ItemWrapper>
+        <LabelText>주문 수량</LabelText>
+        <HeadingText>{quantity}개</HeadingText>
+      </ItemWrapper>
+      <ItemWrapper>
+        <LabelText>메시지</LabelText>
+        <HeadingText>{message}</HeadingText>
+      </ItemWrapper>
       <ItemWrapper>
         <LabelText>최종 결제금액</LabelText>
         <HeadingText>{totalPrice}원</HeadingText>
