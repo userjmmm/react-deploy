@@ -2,7 +2,6 @@ import { Box, Button, HStack, Image, Text, VStack } from '@chakra-ui/react';
 import styled from '@emotion/styled';
 import { useEffect, useState } from 'react';
 
-import { RouterPath } from '@/routes/path';
 import { fetchInstance, getBaseUrl } from '@/api/instance';
 
 interface WishlistItem {
@@ -43,8 +42,7 @@ interface WishlistResponseData {
 }
 
 export const MyAccountPage = () => {
-  const authToken = localStorage.getItem('authToken');
-  const authInfo = authToken ? { token: authToken } : {};
+  const authInfo = localStorage.getItem('authToken');
   const [wishlist, setWishlist] = useState<WishlistItem[]>([]);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
@@ -57,8 +55,9 @@ export const MyAccountPage = () => {
         `${getWishlistPath()}?page=${page}&size=10&sort=createdDate,desc`,
         {
           headers: {
-            Authorization: `Bearer ${authInfo.token}`,
+            Authorization: `Bearer ${authInfo}`,
           },
+          withCredentials: true,
         }
       );
 
@@ -67,7 +66,7 @@ export const MyAccountPage = () => {
         console.log('Response data:', data);
         setWishlist(data.content);
         setTotalPages(data.totalPages);
-      } else if (response.status === 401) {
+      } else if (response.status === 403) {
         alert('토큰이 유효하지 않습니다. 다시 로그인해주세요.');
       } else {
         alert('위시 리스트를 불러오는데 실패했습니다.');
@@ -79,26 +78,24 @@ export const MyAccountPage = () => {
   };
 
   useEffect(() => {
-    if (authInfo.token) {
-      fetchWishlist(page);
-    }
-  }, [page, authInfo.token]);
+    fetchWishlist(page);
+  }, [page, authInfo]);
 
   const handleDelete = async (wishId: number) => {
     try {
-      const response = await fetch(`/api/wishes/${wishId}`, {
+      const response = await fetch(`${getBaseUrl()}/api/wishes/${wishId}`, {
         method: 'DELETE',
         headers: {
-          Authorization: `Bearer ${authInfo.token}`,
+          Authorization: `Bearer ${authInfo}`,
         },
       });
 
-      if (response.status === 204) {
+      if (response.ok) {
         setWishlist((prev) => prev.filter((item) => item.wishId !== wishId));
         alert('관심 목록에서 삭제되었습니다.');
-      } else if (response.status === 404) {
+      } else if (response.status === 400) {
         alert('관심 상품을 찾을 수 없습니다.');
-      } else if (response.status === 401) {
+      } else if (response.status === 403) {
         alert('토큰이 유효하지 않습니다. 다시 로그인해주세요.');
       } else {
         alert('관심 목록 삭제에 실패했습니다.');
@@ -111,15 +108,14 @@ export const MyAccountPage = () => {
 
   const handleLogout = () => {
     localStorage.removeItem('authToken');
-
-    const redirectURL = `${window.location.origin}${RouterPath.home}`;
+    const redirectURL = `${window.location.origin}`;
     window.location.replace(redirectURL);
   };
 
   return (
     <Wrapper>
       <Text fontSize="2xl" fontWeight="bold">
-        {authInfo.token ? '안녕하세요!' : '로그인이 필요합니다.'}
+        {authInfo ? "사용자" : "로그인이 필요합니다"}님 안녕하세요!
       </Text>
       <Box height="64px" />
       <VStack spacing={4} align="stretch">
