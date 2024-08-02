@@ -8,19 +8,17 @@ import type { OrderHistory } from '@/types';
 import { LabelText } from '../Common/LabelText';
 
 type Props = {
-  orderHistory: OrderHistory;
+  orderHistory: OrderHistory[];
 };
 
 export const GoodsInfo = ({ orderHistory }: Props) => {
-  const { productId, optionId, quantity } = orderHistory;
+  const productId = orderHistory[0].productId;
   const { data: detail, isLoading: isDetailLoading } = useGetProductDetail({ productId: productId.toString() });
   const { data: options, isLoading: isOptionsLoading } = useGetProductOptions({ productId: productId.toString() });
 
   if (isDetailLoading || isOptionsLoading) {
     return <div>정보를 불러오는 중입니다...</div>;
   }
-
-  const selectedOption = options.find(option => option.id === optionId);
 
   return (
     <Wrapper>
@@ -32,15 +30,16 @@ export const GoodsInfo = ({ orderHistory }: Props) => {
             <Image src={detail.imageUrl} width={86} ratio="square" />
           </GoodsInfoImage>
           <GoodsInfoTextWrapper>
-            <GoodsInfoTextTitle>
-              {detail.name} X {quantity}개
-            </GoodsInfoTextTitle>
-            <GoodsInfoTextMessage>
-              {orderHistory.message}
-            </GoodsInfoTextMessage>
-            <GoodsInfoTextOption>
-              {selectedOption ? selectedOption.name : '옵션 없음'}
-            </GoodsInfoTextOption>
+            <GoodsInfoTextTitle>{detail.name}</GoodsInfoTextTitle>
+            {orderHistory.map((order, index) => {
+              const selectedOption = options.find(option => option.id === order.optionId);
+              return (
+                <GoodsInfoTextOption key={index}>
+                  {selectedOption ? `${selectedOption.name} X ${order.quantity}개` : '옵션 없음'}
+                </GoodsInfoTextOption>
+              );
+            })}
+            <GoodsInfoTextMessage>{orderHistory[0].message}</GoodsInfoTextMessage>
           </GoodsInfoTextWrapper>
         </GoodsInfoWrapper>
       </GoodsWrapper>
