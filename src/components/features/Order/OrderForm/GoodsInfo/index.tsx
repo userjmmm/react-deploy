@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
-
 import { useGetProductDetail } from '@/api/hooks/useGetProductDetail';
+import { useGetProductOptions } from '@/api/hooks/useGetProductOptions';
 import { Image } from '@/components/common/Image';
 import { Spacing } from '@/components/common/layouts/Spacing';
 import type { OrderHistory } from '@/types';
@@ -10,9 +10,17 @@ import { LabelText } from '../Common/LabelText';
 type Props = {
   orderHistory: OrderHistory;
 };
+
 export const GoodsInfo = ({ orderHistory }: Props) => {
-  const { id, count } = orderHistory;
-  const { data: detail } = useGetProductDetail({ productId: id.toString() });
+  const { productId, optionId, quantity } = orderHistory;
+  const { data: detail, isLoading: isDetailLoading } = useGetProductDetail({ productId: productId.toString() });
+  const { data: options, isLoading: isOptionsLoading } = useGetProductOptions({ productId: productId.toString() });
+
+  if (isDetailLoading || isOptionsLoading) {
+    return <div>정보를 불러오는 중입니다...</div>;
+  }
+
+  const selectedOption = options.find(option => option.id === optionId);
 
   return (
     <Wrapper>
@@ -25,8 +33,14 @@ export const GoodsInfo = ({ orderHistory }: Props) => {
           </GoodsInfoImage>
           <GoodsInfoTextWrapper>
             <GoodsInfoTextTitle>
-              {detail.name} X {count}개
+              {detail.name} X {quantity}개
             </GoodsInfoTextTitle>
+            <GoodsInfoTextMessage>
+              {orderHistory.message}
+            </GoodsInfoTextMessage>
+            <GoodsInfoTextOption>
+              {selectedOption ? selectedOption.name : '옵션 없음'}
+            </GoodsInfoTextOption>
           </GoodsInfoTextWrapper>
         </GoodsInfoWrapper>
       </GoodsWrapper>
@@ -69,4 +83,22 @@ const GoodsInfoTextTitle = styled.p`
   color: #222;
   overflow: hidden;
   font-weight: 400;
+`;
+
+const GoodsInfoTextMessage = styled.p`
+  font-size: 12px;
+  line-height: 16px;
+  color: #666;
+  margin-top: 4px;
+  white-space: pre-wrap;
+  word-break: break-word;
+`;
+
+const GoodsInfoTextOption = styled.p`
+  font-size: 12px;
+  line-height: 16px;
+  color: #666;
+  margin-top: 4px;
+  white-space: pre-wrap;
+  word-break: break-word;
 `;
