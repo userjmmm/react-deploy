@@ -50,8 +50,7 @@ export const OptionSection = ({ productId }: Props) => {
   }, [options]);
 
   const totalPrice = useMemo(() => {
-    if (!detail)
-      return 0;
+    if (!detail) return 0;
     const count = Object.values(counts).reduce((acc, countStr) => acc + Number(countStr), 0);
     return detail.price * count;
   }, [detail, counts]);
@@ -109,8 +108,7 @@ export const OptionSection = ({ productId }: Props) => {
         '로그인이 필요한 메뉴입니다.\n로그인 페이지로 이동하시겠습니까?',
       );
 
-      if (!isConfirm)
-        return;
+      if (!isConfirm) return;
       return navigate(getDynamicPath.login());
     }
 
@@ -121,14 +119,18 @@ export const OptionSection = ({ productId }: Props) => {
       return;
     }
 
-    const selectedOption = options.find(option => Number(counts[option.id]) > 0);
+    const selectedOptions = options
+      .filter(option => Number(counts[option.id]) > 0)
+      .map(option => ({
+        productId: parseInt(productId, 10),
+        optionId: option.id,
+        quantity: Number(counts[option.id]),
+        message: '',
+      }));
 
-    orderHistorySessionStorage.set({
-      productId: parseInt(productId, 10),
-      optionId: selectedOption?.id ?? 0,
-      quantity: totalCount,
-      message: '',
-    });
+    console.log('선택된 옵션 및 수량:', selectedOptions); // 콘솔 로그 추가
+
+    orderHistorySessionStorage.set(selectedOptions);
 
     navigate(RouterPath.order);
   };
