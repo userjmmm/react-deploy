@@ -18,19 +18,12 @@
   <script>
     const params = new URLSearchParams(window.location.search);
     const token = params.get('tokenValue');
-    // 토큰을 표시할 요소 - 추후 삭제 예정
-    const tokenDisplay = document.getElementById('tokenDisplay');
 
     if (token) {
       // 토큰이 존재하면 로컬 스토리지에 저장
       console.log('Received token:', token);
       localStorage.setItem('authToken', token);
-      tokenDisplay.textContent = `Received token: ${token}`;
-
-      // 확인 후 홈페이지로 리디렉션 - 추후 삭제 예정
-      setTimeout(() => {
-        window.location.href = '/';
-      }, 2000);
+      window.location.href = '/';
     } else {
       console.error('Token not found in query parameters.');
       tokenDisplay.textContent = 'Token not found in query parameters.';
