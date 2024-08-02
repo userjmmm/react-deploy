@@ -32,7 +32,7 @@ export const OrderFormOrderInfo = ({ orderHistory }: Props) => {
     return total + (selectedOption ? detail.price * order.quantity : 0);
   }, 0);
 
-  const discountedPrice = Math.round(totalPrice * 0.9);
+  const discountedPrice = Math.round(totalPrice * 0.95);
 
   return (
     <Wrapper>
