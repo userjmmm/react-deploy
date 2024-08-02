@@ -13,6 +13,7 @@ import { getDynamicPath, RouterPath } from '@/routes/path';
 import { orderHistorySessionStorage } from '@/utils/storage';
 
 import { CountOptionItem } from './OptionItem/CountOptionItem';
+import { getBaseUrl } from '@/api/instance';
 
 type Props = ProductDetailRequestParams;
 
@@ -76,7 +77,7 @@ export const OptionSection = ({ productId }: Props) => {
 
       console.log('Sending request to add wish', requestBody); // 잘 받아오는지 확인 - 추후 삭제 예정
 
-      const response = await fetch('/api/wishes', {
+      const response = await fetch(`${getBaseUrl()}/api/wishes`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${authInfo.token}`,
