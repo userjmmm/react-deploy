@@ -1,21 +1,23 @@
 import { Textarea } from '@chakra-ui/react';
 import styled from '@emotion/styled';
-
 import { useOrderFormContext } from '@/hooks/useOrderFormContext';
 
 export const MessageCardFields = () => {
-  const { register } = useOrderFormContext();
+  const { register, watch, setValue } = useOrderFormContext();
+  const message = watch('message');
 
   return (
     <Wrapper>
       <TextMessageWrapper>
         <Textarea
-          {...register('messageCardTextMessage')}
+          {...register('message')}
           placeholder="선물과 함께 보낼 메시지를 적어보세요"
           resize="none"
           height="100"
           variant="filled"
           colorScheme="gray"
+          value={message}
+          onChange={(e) => setValue('message', e.target.value)}
         />
       </TextMessageWrapper>
     </Wrapper>
