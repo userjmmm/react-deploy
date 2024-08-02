@@ -1,6 +1,7 @@
 import { Box, Button, HStack, Image, Text, VStack } from '@chakra-ui/react';
 import styled from '@emotion/styled';
 import { useEffect, useState } from 'react';
+import base64 from 'base-64';
 
 import { fetchInstance, getBaseUrl } from '@/api/instance';
 
@@ -46,6 +47,31 @@ export const MyAccountPage = () => {
   const [wishlist, setWishlist] = useState<WishlistItem[]>([]);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
+  const [userName, setUserName] = useState<string>("사용자");
+
+  useEffect(() => {
+    if (authInfo) {
+      try {
+        const [headerEncoded, payloadEncoded, signature] = authInfo.split('.');
+        const payload = JSON.parse(base64.decode(payloadEncoded));
+  
+        console.log('Token Header:', JSON.parse(base64.decode(headerEncoded)));
+        console.log('Token Payload:', payload);
+        console.log('Token Signature:', signature);
+        console.log('Payload Keys:', Object.keys(payload));
+  
+        if (payload.sub) {
+          const email = payload.sub;
+          const displayName = email.split('@')[0];
+          setUserName(displayName);
+        }
+      } catch (error) {
+        console.error('토큰 디코딩 에러:', error);
+      }
+    } else {
+      setUserName("사용자");
+    }
+  }, [authInfo]);
 
   const getWishlistPath = () => `${getBaseUrl()}/api/wishes`;
 
@@ -115,7 +141,7 @@ export const MyAccountPage = () => {
   return (
     <Wrapper>
       <Text fontSize="2xl" fontWeight="bold">
-        {authInfo ? "사용자" : "로그인이 필요합니다"}님 안녕하세요!
+        {authInfo ? userName : "로그인이 필요합니다"}님 안녕하세요!
       </Text>
       <Box height="64px" />
       <VStack spacing={4} align="stretch">
