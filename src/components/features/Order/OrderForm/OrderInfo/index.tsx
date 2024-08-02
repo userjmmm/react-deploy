@@ -32,6 +32,8 @@ export const OrderFormOrderInfo = ({ orderHistory }: Props) => {
     return total + (selectedOption ? detail.price * order.quantity : 0);
   }, 0);
 
+  const discountedPrice = Math.round(totalPrice * 0.9);
+
   return (
     <Wrapper>
       <Title>
@@ -54,16 +56,16 @@ export const OrderFormOrderInfo = ({ orderHistory }: Props) => {
         );
       })}
       <ItemWrapper>
-        <LabelText>메시지</LabelText>
-        <HeadingText>{orderHistory[0].message}</HeadingText>
+        <LabelText>총 결제금액</LabelText>
+        <HeadingText>{totalPrice}원</HeadingText>
       </ItemWrapper>
       <ItemWrapper>
-        <LabelText>최종 결제금액</LabelText>
-        <HeadingText>{totalPrice}원</HeadingText>
+        <LabelText>포인트 결제 금액</LabelText>
+        <HeadingText>{discountedPrice}원</HeadingText>
       </ItemWrapper>
       <Divider color="#ededed" />
       <Spacing height={32} />
-      <Button type="submit">{totalPrice}원 결제하기</Button>
+      <Button type="submit">{discountedPrice}원 결제하기</Button>
     </Wrapper>
   );
 };
