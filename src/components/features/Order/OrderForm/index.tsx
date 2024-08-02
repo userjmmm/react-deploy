@@ -10,7 +10,6 @@ import { OrderFormOrderInfo } from './OrderInfo';
 import { getBaseUrl } from '@/api/instance';
 import { useAuth } from '@/provider/Auth';
 import { orderHistorySessionStorage } from '@/utils/storage';
-import { useEffect } from 'react';
 
 type Props = {
   orderHistory: OrderHistory[];
@@ -28,15 +27,8 @@ export const OrderForm = ({ orderHistory }: Props) => {
     },
   });
 
-  const { handleSubmit, watch } = methods;
+  const { handleSubmit } = methods;
   const authInfo = useAuth();
-
-  const message = watch('message');
-  console.log('OrderForm에서 현재 메시지:', message);
-
-  useEffect(() => {
-    console.log('OrderForm useEffect - 메시지 변경:', message);
-  }, [message]);
 
   const handleForm = async (values: OrderFormData) => {
     const { errorMessage, isValid } = validateOrderForm(values);
@@ -48,9 +40,6 @@ export const OrderForm = ({ orderHistory }: Props) => {
 
     const orders = orderHistorySessionStorage.get() as OrderHistory[];
 
-    console.log('유효성 검사 통과 후 값:', values);
-    console.log('선택된 옵션 및 수량:', orders);
-
     const requests = orders.map(order => {
       const requestBody = {
         optionId: order.optionId,
@@ -58,7 +47,7 @@ export const OrderForm = ({ orderHistory }: Props) => {
         message: values.message,
       };
 
-      console.log('서버로 전송하는 요청 데이터:', requestBody);
+      console.log('서버로 전송하는 요청 데이터:', JSON.stringify(requestBody, null, 2));
 
       return fetch(`${getBaseUrl()}/api/orders`, {
         method: 'POST',
@@ -69,29 +58,39 @@ export const OrderForm = ({ orderHistory }: Props) => {
         body: JSON.stringify(requestBody),
         credentials: 'include',
       })
-      .then(response => {
+      .then(async response => {
         if (!response.ok) {
-          throw new Error(`주문 실패: ${response.status}`);
+          const errorBody = await response.text();
+          console.error(`옵션 ID ${order.optionId} 주문 실패:`, response.status, errorBody);
+          return { success: false, optionId: order.optionId, error: errorBody };
         }
-        return response.json();
-      })
-      .then(data => {
+        const data = await response.json();
         console.log(`옵션 ID ${order.optionId} 주문 성공:`, data);
-        return data;
+        return { success: true, optionId: order.optionId, data };
       })
       .catch(error => {
         console.error(`옵션 ID ${order.optionId} 주문 에러:`, error);
-        throw error;
+        return { success: false, optionId: order.optionId, error: error.message };
       });
     });
 
     try {
       const results = await Promise.all(requests);
-      alert('모든 주문이 완료되었습니다.');
-      console.log('모든 주문 결과:', results);
+      const successfulOrders = results.filter(result => result.success);
+      const failedOrders = results.filter(result => !result.success);
+
+      if (successfulOrders.length > 0) {
+        console.log('성공한 주문:', successfulOrders);
+        alert(`${successfulOrders.length}개의 주문이 완료되었습니다.`);
+      }
+
+      if (failedOrders.length > 0) {
+        console.error('실패한 주문:', failedOrders);
+        alert(`${failedOrders.length}개의 주문 중 오류가 발생했습니다.`);
+      }
     } catch (error) {
-      console.error('주문 에러:', error);
-      alert('주문 중 에러가 발생했습니다.');
+      console.error('주문 처리 중 예외 발생:', error);
+      alert('주문 처리 중 예기치 않은 오류가 발생했습니다.');
     }
   };
 
@@ -105,15 +104,13 @@ export const OrderForm = ({ orderHistory }: Props) => {
   return (
     <FormProvider {...methods}>
       <form action="" onSubmit={handleSubmit(handleForm)} onKeyDown={preventEnterKeySubmission}>
-        {orderHistory.map((order, index) => (
-          <SplitLayout key={index} sidebar={<OrderFormOrderInfo orderHistory={order} />}>
-            <Wrapper>
-              <OrderFormMessageCard />
-              <Spacing height={8} backgroundColor="#ededed" />
-              <GoodsInfo orderHistory={order} />
-            </Wrapper>
-          </SplitLayout>
-        ))}
+        <SplitLayout sidebar={<OrderFormOrderInfo orderHistory={orderHistory} />}>
+          <Wrapper>
+            <OrderFormMessageCard />
+            <Spacing height={8} backgroundColor="#ededed" />
+            <GoodsInfo orderHistory={orderHistory} />
+          </Wrapper>
+        </SplitLayout>
       </form>
     </FormProvider>
   );
