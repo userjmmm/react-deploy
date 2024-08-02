@@ -121,9 +121,13 @@ export const OptionSection = ({ productId }: Props) => {
       return;
     }
 
+    const selectedOption = options.find(option => Number(counts[option.id]) > 0);
+
     orderHistorySessionStorage.set({
-      id: parseInt(productId, 10),
-      count: totalCount,
+      productId: parseInt(productId, 10),
+      optionId: selectedOption?.id ?? 0,
+      quantity: totalCount,
+      message: '',
     });
 
     navigate(RouterPath.order);

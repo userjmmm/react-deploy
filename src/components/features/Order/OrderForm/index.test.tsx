@@ -10,17 +10,17 @@ import { OrderForm } from '.';
 
 const queryClient = new QueryClient();
 
-const Wrapper = ({ children, orderHistory }: { children: React.ReactNode, orderHistory: { id: number, count: number } }) => {
+const Wrapper = ({ children, orderHistory }: { children: React.ReactNode, orderHistory: { productId: number, optionId: number, quantity: number, message: string } }) => {
   const methods = useForm<OrderFormData>({
     defaultValues: {
-      optionId: orderHistory.id, // productId 대신 optionId 사용
-      productQuantity: orderHistory.count,
+      optionId: orderHistory.optionId,
+      productQuantity: orderHistory.quantity,
       senderId: 0,
       receiverId: 0,
       hasCashReceipt: false,
       cashReceiptType: 'PERSONAL',
       cashReceiptNumber: '',
-      messageCardTextMessage: '', // 기본값 추가
+      messageCardTextMessage: orderHistory.message,
     },
   });
 
@@ -33,8 +33,10 @@ const Wrapper = ({ children, orderHistory }: { children: React.ReactNode, orderH
 
 describe('OrderForm 컴포넌트', () => {
   const orderHistory = {
-    id: 1, // optionId를 의미
-    count: 2,
+    productId: 1,
+    optionId: 1,
+    quantity: 2,
+    message: '',
   };
 
   test('폼이 렌더링되는지 확인', () => {
@@ -43,7 +45,7 @@ describe('OrderForm 컴포넌트', () => {
         <OrderForm orderHistory={orderHistory} />
       </Wrapper>
     );
-    expect(screen.getByText('주문 정보')).toBeInTheDocument();
+    expect(screen.getByText('결제 정보')).toBeInTheDocument();
   });
 
   test('유효하지 않은 입력값에 대해 에러 메시지 표시', () => {
@@ -52,7 +54,7 @@ describe('OrderForm 컴포넌트', () => {
         <OrderForm orderHistory={orderHistory} />
       </Wrapper>
     );
-    fireEvent.submit(screen.getByRole('form'));
+    fireEvent.submit(screen.getByRole('button', { name: /결제하기/i }));
 
     expect(screen.getByText('메시지를 입력해주세요.')).toBeInTheDocument();
   });
@@ -65,7 +67,7 @@ describe('OrderForm 컴포넌트', () => {
     );
 
     fireEvent.change(screen.getByPlaceholderText('선물과 함께 보낼 메시지를 적어보세요'), { target: { value: 'Test message' } });
-    fireEvent.submit(screen.getByRole('form'));
+    fireEvent.submit(screen.getByRole('button', { name: /결제하기/i }));
 
     expect(screen.queryByText('메시지를 입력해주세요.')).not.toBeInTheDocument();
   });
@@ -103,18 +105,18 @@ describe('OrderForm 컴포넌트', () => {
       </Wrapper>
     );
 
-    fireEvent.submit(screen.getByRole('form'));
+    fireEvent.submit(screen.getByRole('button', { name: /결제하기/i }));
     expect(screen.getByText('메시지를 입력해주세요.')).toBeInTheDocument();
 
     fireEvent.click(screen.getByLabelText(/현금영수증 신청/i));
     fireEvent.change(screen.getByRole('combobox'), { target: { value: 'PERSONAL' } });
     fireEvent.change(screen.getByPlaceholderText('(-없이) 숫자만 입력해주세요.'), { target: { value: 'abc' } });
-    fireEvent.submit(screen.getByRole('form'));
+    fireEvent.submit(screen.getByRole('button', { name: /결제하기/i }));
     expect(screen.getByText('현금영수증 번호는 숫자로만 입력해주세요.')).toBeInTheDocument();
 
     fireEvent.change(screen.getByPlaceholderText('선물과 함께 보낼 메시지를 적어보세요'), { target: { value: 'Test message' } });
     fireEvent.change(screen.getByPlaceholderText('(-없이) 숫자만 입력해주세요.'), { target: { value: '1234567890' } });
-    fireEvent.submit(screen.getByRole('form'));
+    fireEvent.submit(screen.getByRole('button', { name: /결제하기/i }));
     expect(screen.queryByText('메시지를 입력해주세요.')).not.toBeInTheDocument();
     expect(screen.queryByText('현금영수증 번호는 숫자로만 입력해주세요.')).not.toBeInTheDocument();
   });
