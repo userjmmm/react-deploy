@@ -74,8 +74,6 @@ export const OptionSection = ({ productId }: Props) => {
         quantity: null,
       };
 
-      console.log('Sending request to add wish', requestBody); // 잘 받아오는지 확인 - 추후 삭제 예정
-
       const response = await fetch(`${getBaseUrl()}/api/wishes`, {
         method: 'POST',
         headers: {
@@ -128,7 +126,7 @@ export const OptionSection = ({ productId }: Props) => {
         message: '',
       }));
 
-    console.log('선택된 옵션 및 수량:', selectedOptions); // 콘솔 로그 추가
+    console.log('선택된 옵션 및 수량:', selectedOptions);
 
     orderHistorySessionStorage.set(selectedOptions);
 
@@ -137,14 +135,16 @@ export const OptionSection = ({ productId }: Props) => {
 
   return (
     <Wrapper>
-      {options && options.map(option => (
-        <CountOptionItem
-          key={option.id}
-          name={option.name}
-          value={counts[option.id]}
-          onChange={value => setCounts(prev => ({ ...prev, [option.id]: value }))}
-        />
-      ))}
+      <OptionsContainer>
+        {options && options.map(option => (
+          <CountOptionItem
+            key={option.id}
+            name={option.name}
+            value={counts[option.id]}
+            onChange={value => setCounts(prev => ({ ...prev, [option.id]: value }))}
+          />
+        ))}
+      </OptionsContainer>
       <BottomWrapper>
         <Button theme="kakao" size="large" onClick={handleInterestClick}>
           관심 등록
@@ -167,6 +167,12 @@ const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+`;
+
+const OptionsContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 `;
 
 const BottomWrapper = styled.div`

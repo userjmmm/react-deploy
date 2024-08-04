@@ -165,7 +165,7 @@ export const MyAccountPage = () => {
             </Box>
           ))
         ) : (
-          <Text>위시리스트에 상품이 없습니다.</Text>
+          <CenteredText>위시리스트에 상품이 없습니다.</CenteredText>
         )}
       </VStack>
       <HStack spacing={4} mt={4}>
@@ -201,4 +201,10 @@ const Wrapper = styled.div`
   justify-content: center;
   font-weight: 700;
   font-size: 36px;
+`;
+
+const CenteredText = styled(Text)`
+  text-align: center;
+  font-size: 14px;
+  color: gray;
 `;

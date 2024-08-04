@@ -1,54 +1,44 @@
 import styled from '@emotion/styled';
+import { ReactNode } from 'react';
 
-import { HEADER_HEIGHT } from '@/components/features/Layout/Header';
-import { breakpoints } from '@/styles/variants';
-
-import { Container } from '../Container';
-
-type Props = {
-  children: React.ReactNode;
-  sidebar: React.ReactNode;
+type SplitLayoutProps = {
+  sidebar: ReactNode;
+  children: ReactNode;
 };
 
-export const SplitLayout = ({ children, sidebar }: Props) => {
+export const SplitLayout = ({ sidebar, children }: SplitLayoutProps) => {
   return (
-    <Wrapper>
-      <Container maxWidth={breakpoints.lg}>
-        <Inner>
-          <Main>{children}</Main>
-          <Sidebar>{sidebar}</Sidebar>
-        </Inner>
-      </Container>
-    </Wrapper>
+    <Container>
+      <MainContent>{children}</MainContent>
+      <Sidebar>{sidebar}</Sidebar>
+    </Container>
   );
 };
 
-const Wrapper = styled.div`
-  width: 100%;
-`;
-
-const Inner = styled.div`
-  width: 100%;
+const Container = styled.div`
   display: flex;
-  justify-content: flex-start;
-  align-items: flex-start;
-  position: relative;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
 `;
 
-const Main = styled.main`
-  width: 100%;
-  max-width: 900px;
+const MainContent = styled.div`
+  flex: 2;
+  padding: 20px;
+
+  @media (max-width: 768px) {
+    order: 1;
+    padding: 10px;
+  }
 `;
 
-const Sidebar = styled.aside`
-  display: none;
-  position: sticky;
-  top: ${HEADER_HEIGHT};
-  width: 100%;
-  max-width: 360px;
-  height: calc(100vh - ${HEADER_HEIGHT});
+const Sidebar = styled.div`
+  flex: 1;
+  padding: 20px;
 
-  @media screen and (min-width: ${breakpoints.sm}) {
-    display: block;
+  @media (max-width: 768px) {
+    order: 2;
+    padding: 10px;
   }
 `;
