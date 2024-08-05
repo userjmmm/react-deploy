@@ -1,4 +1,4 @@
-import { Divider } from '@chakra-ui/react';
+import { Divider, Spinner } from '@chakra-ui/react';
 import styled from '@emotion/styled';
 import { useGetProductDetail } from '@/api/hooks/useGetProductDetail';
 import { useGetProductOptions } from '@/api/hooks/useGetProductOptions';
@@ -12,9 +12,11 @@ import { LoadingView } from '@/components/common/View/LoadingView';
 
 type Props = {
   orderHistory: OrderHistory[];
+  memberPoints?: number;
+  isPointsLoading: boolean;
 };
 
-export const OrderFormOrderInfo = ({ orderHistory }: Props) => {
+export const OrderFormOrderInfo = ({ orderHistory, memberPoints, isPointsLoading }: Props) => {
   const productId = orderHistory[0].productId;
   const { data: detail, isLoading: isDetailLoading } = useGetProductDetail({ productId: productId.toString() });
   const { data: options, isLoading: isOptionsLoading } = useGetProductOptions({ productId: productId.toString() });
@@ -57,15 +59,25 @@ export const OrderFormOrderInfo = ({ orderHistory }: Props) => {
       })}
       <ItemWrapper>
         <LabelText>총 결제금액</LabelText>
-        <HeadingText>{totalPrice}원</HeadingText>
+        <HeadingText>{totalPrice.toLocaleString()}원</HeadingText>
+      </ItemWrapper>
+      <ItemWrapper>
+        <LabelText>보유 포인트</LabelText>
+        {isPointsLoading ? (
+          <Spinner size="sm" />
+        ) : (
+          <HeadingText>{memberPoints?.toLocaleString() ?? '0'}원</HeadingText>
+        )}
       </ItemWrapper>
       <ItemWrapper>
         <LabelText>포인트 결제 금액</LabelText>
-        <HeadingText>{discountedPrice}원</HeadingText>
+        <HeadingText>{discountedPrice.toLocaleString()}원</HeadingText>
       </ItemWrapper>
       <Divider color="#ededed" />
       <Spacing height={32} />
-      <Button type="submit">{discountedPrice}원 결제하기</Button>
+      <Button type="submit" disabled={isPointsLoading || (memberPoints ?? 0) < discountedPrice}>
+        {discountedPrice.toLocaleString()}원 결제하기
+      </Button>
     </Wrapper>
   );
 };

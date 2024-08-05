@@ -10,6 +10,7 @@ import { OrderFormOrderInfo } from './OrderInfo';
 import { getBaseUrl } from '@/api/instance';
 import { useAuth } from '@/provider/Auth';
 import { orderHistorySessionStorage } from '@/utils/storage';
+import { useGetMemberPoints } from '@/api/hooks/useGetMemberPoints';
 
 type Props = {
   orderHistory: OrderHistory[];
@@ -29,6 +30,7 @@ export const OrderForm = ({ orderHistory }: Props) => {
 
   const { handleSubmit } = methods;
   const authInfo = useAuth();
+  const { data: memberPoints, isLoading: isPointsLoading } = useGetMemberPoints();
 
   const handleForm = async (values: OrderFormData) => {
     const { errorMessage, isValid } = validateOrderForm(values);
@@ -100,7 +102,13 @@ export const OrderForm = ({ orderHistory }: Props) => {
   return (
     <FormProvider {...methods}>
       <form action="" onSubmit={handleSubmit(handleForm)} onKeyDown={preventEnterKeySubmission}>
-        <SplitLayout sidebar={<OrderFormOrderInfo orderHistory={orderHistory} />}>
+        <SplitLayout sidebar={
+          <OrderFormOrderInfo 
+            orderHistory={orderHistory}
+            memberPoints={memberPoints}
+            isPointsLoading={isPointsLoading}
+          />
+        }>
           <Wrapper>
             <OrderFormMessageCard />
             <Spacing height={8} backgroundColor="#ededed" />
@@ -140,8 +148,8 @@ const validateOrderForm = (values: OrderFormData): { errorMessage?: string; isVa
 
   if (values.message.length > 100) {
     return {
-        errorMessage: '메시지는 100자 이내로 입력해주세요.',
-        isValid: false,
+      errorMessage: '메시지는 100자 이내로 입력해주세요.',
+      isValid: false,
     };
   }
 
