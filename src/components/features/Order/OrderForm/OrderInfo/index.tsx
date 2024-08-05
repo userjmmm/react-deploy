@@ -75,7 +75,7 @@ export const OrderFormOrderInfo = ({ orderHistory, memberPoints, isPointsLoading
       </ItemWrapper>
       <Divider color="#ededed" />
       <Spacing height={32} />
-      <Button type="submit" disabled={isPointsLoading || (memberPoints ?? 0) < discountedPrice}>
+      <Button type="submit">
         {discountedPrice.toLocaleString()}원 결제하기
       </Button>
     </Wrapper>

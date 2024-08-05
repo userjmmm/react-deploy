@@ -11,6 +11,7 @@ import { getBaseUrl } from '@/api/instance';
 import { useAuth } from '@/provider/Auth';
 import { orderHistorySessionStorage } from '@/utils/storage';
 import { useGetMemberPoints } from '@/api/hooks/useGetMemberPoints';
+import { useGetProductDetail } from '@/api/hooks/useGetProductDetail';
 import { useNavigate } from 'react-router-dom';
 
 type Props = {
@@ -33,6 +34,7 @@ export const OrderForm = ({ orderHistory }: Props) => {
   const authInfo = useAuth();
   const { data: memberPoints, isLoading: isPointsLoading } = useGetMemberPoints();
   const navigate = useNavigate();
+  const { data: productDetail } = useGetProductDetail({ productId: orderHistory[0].productId.toString() });
 
   const handleForm = async (values: OrderFormData) => {
     const { errorMessage, isValid } = validateOrderForm(values);
@@ -43,6 +45,14 @@ export const OrderForm = ({ orderHistory }: Props) => {
     }
 
     const orders = orderHistorySessionStorage.get() as OrderHistory[];
+
+    const totalPrice = orders.reduce((total, order) => total + (productDetail?.price ?? 0) * order.quantity, 0);
+    const discountedPrice = Math.round(totalPrice * 0.95);
+
+    if ((memberPoints ?? 0) < discountedPrice) {
+      alert('포인트가 부족합니다.');
+      return;
+    }
 
     const results = [];
     for (const order of orders) {
@@ -83,15 +93,22 @@ export const OrderForm = ({ orderHistory }: Props) => {
     const successfulOrders = results.filter(result => result.success);
     const failedOrders = results.filter(result => !result.success);
 
+    let message = '';
+
     if (successfulOrders.length > 0) {
       console.log('성공한 주문:', successfulOrders);
-      alert(`${successfulOrders.length}개의 주문이 완료되었습니다.`);
-      navigate('/');
+      message += `${successfulOrders.length}개의 주문이 완료되었습니다.\n`;
     }
 
     if (failedOrders.length > 0) {
       console.error('실패한 주문:', failedOrders);
-      alert(`${failedOrders.length}개의 주문 중 오류가 발생했습니다.`);
+      message += `${failedOrders.length}개의 주문 중 오류가 발생했습니다.\n`;
+    }
+
+    alert(message.trim());
+
+    if (successfulOrders.length > 0) {
+      navigate('/');
     }
   };
 
