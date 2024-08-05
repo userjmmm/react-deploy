@@ -11,6 +11,7 @@ import { getBaseUrl } from '@/api/instance';
 import { useAuth } from '@/provider/Auth';
 import { orderHistorySessionStorage } from '@/utils/storage';
 import { useGetMemberPoints } from '@/api/hooks/useGetMemberPoints';
+import { useNavigate } from 'react-router-dom';
 
 type Props = {
   orderHistory: OrderHistory[];
@@ -31,6 +32,7 @@ export const OrderForm = ({ orderHistory }: Props) => {
   const { handleSubmit } = methods;
   const authInfo = useAuth();
   const { data: memberPoints, isLoading: isPointsLoading } = useGetMemberPoints();
+  const navigate = useNavigate();
 
   const handleForm = async (values: OrderFormData) => {
     const { errorMessage, isValid } = validateOrderForm(values);
@@ -84,6 +86,7 @@ export const OrderForm = ({ orderHistory }: Props) => {
     if (successfulOrders.length > 0) {
       console.log('성공한 주문:', successfulOrders);
       alert(`${successfulOrders.length}개의 주문이 완료되었습니다.`);
+      navigate('/');
     }
 
     if (failedOrders.length > 0) {
